@@ -6,6 +6,8 @@ cookieParser = require('cookie-parser');
 //const { swaggerUi, swaggerDocs } = require('./swagger.js');
 
 //Routes
+const authRoutes = require('./routes/auth.routes');
+const rolRoutes = require('./routes/rol.routes');
 
 
 app.use(express.json());
@@ -15,11 +17,15 @@ app.use(cors({ origin: process.env.ORIGIN , credentials:true}));
 
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+//use routes
+app.use(authRoutes);
+app.use(rolRoutes);
+
 app.get('/',(req,res)=>{
     res.send('Hello from Backend API')
 });
 
-//use routes
+
 
 
 module.exports = app;
