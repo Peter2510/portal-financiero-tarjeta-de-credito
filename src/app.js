@@ -8,6 +8,9 @@ cookieParser = require('cookie-parser');
 //Routes
 const authRoutes = require('./routes/auth.routes');
 const rolRoutes = require('./routes/rol.routes');
+const monedaRoutes = require('./routes/moneda.routes');
+const motivoEliminacionRoutes = require('./routes/motivo_eliminacion.routes');
+const motivoBloqueoRoutes = require('./routes/motivo_bloqueo.routes');
 
 
 app.use(express.json());
@@ -20,6 +23,9 @@ app.use(cors({ origin: process.env.ORIGIN , credentials:true}));
 //use routes
 app.use(authRoutes);
 app.use(rolRoutes);
+app.use(monedaRoutes);
+app.use(motivoEliminacionRoutes);
+app.use(motivoBloqueoRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Hello from Backend API')

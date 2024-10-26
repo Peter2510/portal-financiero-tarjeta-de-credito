@@ -1,27 +1,47 @@
 const { sequelize } = require("../configs/database.configs");
 require('dotenv').config();
-const Rol = require("../models/rol.models");
+const Moneda = require("../models/moneda.models");
 const { v4: uuidv4 } = require('uuid');
 
 
-const crearRol = async (req, res) => {
-  try {
-    const { nombre } = req.body;
-    
-    //generar el UUID
-    const id = uuidv4();
-
-    //crear el rol con el UUID
-    await Rol.create({ id, nombre });
-
-    res.status(200).json({ ok: true, mensaje: "Rol creado exitosamente" });
-
-  } catch (error) {
-    console.log(error);
-    return res.json({ ok: false, mensaje: "Error al crear el rol" });
-  }
+const crearMoneda = async (req, res) => {
+    const { simbolo, codigo_pais } = req.body;
+    try {
+        const moneda = await Moneda.create({
+            id: uuidv4(),
+            simbolo,
+            codigo_pais
+        });
+        return res.status(201).json({
+            ok: true,
+            mensaje: "Moneda creada exitosamente",
+        });
+    } catch (error) {
+      console.log(error);
+        return res.status(500).json({
+            ok: false,
+            mensaje: "Error al crear la moneda",
+        });
+    }
 };
 
+const listarMonedas = async (req, res) => {
+    try {
+        const monedas = await Moneda.findAll();
+        return res.status(200).json({
+            ok: true,
+            monedas,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            mensaje: "Error al obtener las monedas",
+        });
+    }
+}
+
 module.exports = {
-    crearRol
+    crearMoneda,
+    listarMonedas
 };

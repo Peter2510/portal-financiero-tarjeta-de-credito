@@ -1,15 +1,13 @@
 const express = require('express');
-const rolController = require('../controllers/rol.controller');
+const monedaController = require('../controllers/moneda.controller');
 const utilidades = require('../configs/utilidades');
 const {validacionJWTAdmin} = require('../middlewares/validacionJWT');
 
 const router = express.Router();
-const api = '/tarjeta-credito/v1/rol';
+const api = '/tarjeta-credito/v1/moneda';
 
-router.post(`${api}/crear-rol`, rolController.crearRol);
-// router.post(`${api}/logOut`,authController.logOut);
-// router.post(`${api}/enable-2fa`, utilidades.iniciar);
-// router.post(`${api}/verify-2fa`, utilidades.verificar);
-// router.post(`${api}/cambioCredenciales`, authController.cambioCredenciales);
+router.post(`${api}/crear-moneda`, monedaController.crearMoneda);
+router.get(`${api}/listar-monedas`, monedaController.listarMonedas);
+
 
 module.exports = router;
