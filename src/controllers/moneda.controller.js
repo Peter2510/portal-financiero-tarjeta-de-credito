@@ -22,17 +22,6 @@ const crearRol = async (req, res) => {
   }
 };
 
-const listarRoles = async (req, res) => {
-  try {
-    const roles = await Rol.findAll();
-    res.status(200).json({ ok: true, roles });
-  } catch (error) {
-    console.log(error);
-    return res.json({ ok: false, mensaje: "Error al obtener los roles" });
-  }
-};
-
 module.exports = {
-    crearRol,
-    listarRoles
+    crearRol
 };
