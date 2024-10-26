@@ -6,10 +6,10 @@ const jwt = require("jsonwebtoken"); // Importing jsonwebtoken
 const Usuario = require("../models/usuario.models");
 require("dotenv").config();
 
-// Configuración de caché con un TTL (time-to-live) de 5 minutos
+//configuración de caché con un TTL (time-to-live) de 5 minutos
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 
-// Endpoint to enable two-way authentication
+//endpoint to enable two-way authentication
 const iniciar = async (req, res) => {
   const { correoElectronico } = req.body;
 

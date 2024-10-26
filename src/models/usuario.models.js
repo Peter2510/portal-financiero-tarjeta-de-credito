@@ -77,8 +77,8 @@ const Usuario = sequelize.define(
             allowNull: false,
             validate: {
                 len: {
-                    args: [9, 9],
-                    msg: "El teléfono debe tener 9 caracteres",
+                    args: [8, 9],
+                    msg: "El teléfono debe tener entre 8 y 9 caracteres",
                 },
                 notNull: {
                     msg: "El teléfono es requerido",
@@ -110,12 +110,12 @@ const Usuario = sequelize.define(
             defaultValue: false,
         },
         pin: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(100),
             allowNull: false,
             validate: {
                 len: {
-                    args: [6, 45],
-                    msg: "El pin debe tener entre 6 y 45 caracteres",
+                    args: [6, 100],
+                    msg: "El pin debe tener entre 6 y 100 caracteres",
                 },
                 notNull: {
                     msg: "El pin es requerido",

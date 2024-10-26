@@ -1,65 +1,106 @@
 const { sequelize } = require("../configs/database.configs");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const utilidades = require("../configs/utilidades");
 require('dotenv').config();
+const Usuario = require("../models/usuario.models");
+const UsuarioWebService = require("../models/usuario_web_service.models");
 
 
-const crearCliente = async (req, res) => {
-  const t = await sequelize.transaction();
-
+const login = async (req, res) => {
   try {
-    const { nombreUsuario, contrasenia, persona } = req.body;
+    const { nombre_usuario, pin } = req.body;
 
-    const email = await Persona.findOne({
-      where: { correoElectronico: persona.correoElectronico },
-      transaction: t,
+    const user = await Usuario.findOne({
+      where: { nombre_usuario },
     });
 
-    if (email) {
-      await t.rollback();
-      return res
-        .status(409)
-        .json({ ok: false, mensaje: "Correo electronico ya registrado" });
+    if (!user) {
+      return res.status(401).json({ ok: false, mensaje: "Credenciales incorrectas" });
     }
 
-    if (!contrasenia) {
-      await t.rollback();
-      return res
-        .status(400)
-        .json({ ok: false, mensaje: "La contraseña es requerida" });
+    const pinValido = await bcrypt.compare(pin, user.pin);
+
+    if (!pinValido) {
+      return res.status(401).json({ ok: false, mensaje: "Credenciales incorrectas" });
     }
 
-    if (contrasenia.length < 8) {
-      await t.rollback();
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          mensaje: "La contraseña debe tener al menos 8 caracteres",
-        });
+
+    //validar el a2f si esta activado
+    if (user.a2f_activo) {
+      return await utilidades.iniciar(req, res);
     }
 
-    // Se crea la persona
-    const newPersona = await Persona.create(persona, { transaction: t });
+    const token = jwt.sign(
+      {
+        idUsuario: user.id,
+        idRol: user.id_rol
+      },
+      process.env.JWT_KEY,
+      { expiresIn: "1h" }
+    );
 
-    // Se crea el usuario
-    const hashedPassword = await bcrypt.hash(contrasenia, 10);
-    await Usuario.create({
-      nombreUsuario,
-      contrasenia: hashedPassword,
-      idPersona: newPersona.id,
-      idTipoUsuario: 2,
-    }, { transaction: t });
+    res.status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 //1 hora de duración
+      }).json({
+        ok: true,
+        a2f: false,
+        mensaje: "Inicio de sesión correcto",
+        token
+      })
 
-    await t.commit();
-    res.status(200).json({ ok: true, mensaje: "Registrado correctamente" });
 
   } catch (error) {
-    await t.rollback();
-    await manejoErrores(error, res, "Usuario");
+    console.log(error);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
 
+const generarTokenWebService = async (req, res) => {
+
+  try {
+    const { llave, pin } = req.body;
+    const usuario = await UsuarioWebService.findOne({ where: { llave } });
+
+    if (usuario) {
+      const validacion = await bcrypt.compare(pin, usuario.pin);
+      if (validacion) {
+
+        const token = jwt.sign(
+          {
+            idUsuario: usuario.id,
+            idRol: usuario.id_rol
+          },
+          process.env.JWT_KEY,
+          { expiresIn: "1h" }
+        );
+
+        return res.status(200)
+          .cookie('token', token, {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 //1 hora de duración
+          }).json({
+            ok: true,
+            token
+          });
+      }
+    }
+
+    return res.status(404).json({
+      ok: false,
+      mensaje: "Credenciales incorrectas"
+    });
+
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+}
+
 module.exports = {
-    crearCliente
+  login,
+  generarTokenWebService
 };

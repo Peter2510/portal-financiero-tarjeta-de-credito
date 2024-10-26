@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 cookieParser = require('cookie-parser');
-//require('./models/asociaciones');
+require('./models/asociaciones');
 //const { swaggerUi, swaggerDocs } = require('./swagger.js');
 
 //Routes
@@ -13,8 +13,9 @@ const motivoEliminacionRoutes = require('./routes/motivo_eliminacion.routes');
 const motivoBloqueoRoutes = require('./routes/motivo_bloqueo.routes');
 const configuracionRoutes = require('./routes/configuracion.routes');
 const tipoMovimientoRoutes = require('./routes/tipo_movimiento.routes');
-const entidadProveedor = require('./routes/entidad_proveedor.routes');
-
+const entidadProveedorRoutes = require('./routes/entidad_proveedor.routes');
+const usuarioRoutes = require('./routes/usuario.routes');
+const usuarioWebServiceRoutes = require('./routes/usuario_web_service.routes');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -31,7 +32,9 @@ app.use(motivoEliminacionRoutes);
 app.use(motivoBloqueoRoutes);
 app.use(configuracionRoutes);
 app.use(tipoMovimientoRoutes);
-app.use(entidadProveedor);
+app.use(entidadProveedorRoutes);
+app.use(usuarioRoutes);
+app.use(usuarioWebServiceRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Hello from Backend API')
