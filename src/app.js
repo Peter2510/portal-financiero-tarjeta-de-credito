@@ -12,6 +12,8 @@ const monedaRoutes = require('./routes/moneda.routes');
 const motivoEliminacionRoutes = require('./routes/motivo_eliminacion.routes');
 const motivoBloqueoRoutes = require('./routes/motivo_bloqueo.routes');
 const configuracionRoutes = require('./routes/configuracion.routes');
+const tipoMovimientoRoutes = require('./routes/tipo_movimiento.routes');
+const entidadProveedor = require('./routes/entidad_proveedor.routes');
 
 
 app.use(express.json());
@@ -28,6 +30,8 @@ app.use(monedaRoutes);
 app.use(motivoEliminacionRoutes);
 app.use(motivoBloqueoRoutes);
 app.use(configuracionRoutes);
+app.use(tipoMovimientoRoutes);
+app.use(entidadProveedor);
 
 app.get('/',(req,res)=>{
     res.send('Hello from Backend API')
