@@ -8,7 +8,7 @@ const Configuracion = sequelize.define(
       type: DataTypes.UUID,
       primaryKey: true,
     },
-    motivo:{
+    tipo:{
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
