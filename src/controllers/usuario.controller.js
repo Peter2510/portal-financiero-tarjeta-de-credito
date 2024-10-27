@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require("bcrypt");
 
 const crearUsuario = async (req, res) => {
-    const { nombre, nombre_usuario, direccion, documento_identificacion, telefono, id_rol, a2f_activo, pin } = req.body;
+    const { nombre, correo_electronico: correo_electronico, direccion, documento_identificacion, telefono, id_rol, a2f_activo, pin } = req.body;
     // crear el pin con bcrypt
     const hashedPin = await bcrypt.hash(pin, 10);
 
@@ -14,7 +14,7 @@ const crearUsuario = async (req, res) => {
         const usuario = await Usuario.create({
             id: uuidv4(),
             nombre,
-            nombre_usuario,
+            correo_electronico: correo_electronico,
             direccion,
             documento_identificacion,
             telefono,
@@ -54,7 +54,7 @@ const obtenerUsuarioPorId = async (req, res) => {
             });
         }
         return res.status(404).json({
-            message: "Usuario no encontrado"
+            ok: false, mensaje: "Usuario no encontrado"
         });
     } catch (error) {
         console.log(error);
@@ -67,12 +67,12 @@ const obtenerUsuarioPorId = async (req, res) => {
 
 const actualizarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { nombre, nombre_usuario, direccion, documento_identificacion, telefono, id_rol, a2f_activo } = req.body;
+    const { nombre, correo_electronico, direccion, documento_identificacion, telefono, id_rol, a2f_activo } = req.body;
     try {
         const usuario = await Usuario.findByPk(id);
         if (usuario) {
             usuario.nombre = nombre;
-            usuario.nombre_usuario = nombre_usuario;
+            usuario.correo_electronico = correo_electronico;
             usuario.direccion = direccion;
             usuario.documento_identificacion = documento_identificacion;
             usuario.telefono = telefono;
@@ -85,7 +85,7 @@ const actualizarUsuario = async (req, res) => {
             });
         }
         return res.status(404).json({
-            message: "Usuario no encontrado"
+            mensaje: "Usuario no encontrado"
         });
     } catch (error) {
         return res.status(500).json({
@@ -109,16 +109,16 @@ const actualizarPinUsuario = async (req, res) => {
                 await usuario.save();
                 return res.status(200).json({
                     ok: true,
-                    message: "Pin actualizado correctamente"
+                    mensaje: "Pin actualizado correctamente"
                 });
             }
             return res.status(400).json({
                 ok: false,
-                message: "El pin actual no es correcto"
+                mensaje: "El pin actual no es correcto"
             });
         }
         return res.status(404).json({
-            message: "Usuario no encontrado"
+            mensaje: "Usuario no encontrado"
         });
     } catch (error) {
         return res.status(500).json({

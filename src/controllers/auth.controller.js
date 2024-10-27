@@ -9,10 +9,10 @@ const UsuarioWebService = require("../models/usuario_web_service.models");
 
 const login = async (req, res) => {
   try {
-    const { nombre_usuario, pin } = req.body;
+    const { correo_electronico, pin } = req.body;
 
     const user = await Usuario.findOne({
-      where: { nombre_usuario },
+      where: { correo_electronico },
     });
 
     if (!user) {
@@ -37,13 +37,13 @@ const login = async (req, res) => {
         idRol: user.id_rol
       },
       process.env.JWT_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "3h" }
     );
 
     res.status(200)
       .cookie('token', token, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 //1 hora de duración
+        maxAge: 3000 * 60 * 60 //3 hora de duración
       }).json({
         ok: true,
         a2f: false,
@@ -74,13 +74,13 @@ const generarTokenWebService = async (req, res) => {
             idRol: usuario.id_rol
           },
           process.env.JWT_KEY,
-          { expiresIn: "1h" }
+          { expiresIn: "3h" }
         );
 
         return res.status(200)
           .cookie('token', token, {
             httpOnly: true,
-            maxAge: 1000 * 60 * 60 //1 hora de duración
+            maxAge: 3000 * 60 * 60 //3 hora de duración
           }).json({
             ok: true,
             token
