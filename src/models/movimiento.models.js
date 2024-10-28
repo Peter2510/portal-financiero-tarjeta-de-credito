@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../configs/database.configs');
 const TipoMovimiento = require("./tipo_movimiento.models");
+const TarjetaCredito = require("./tarjeta_credito.models");
 
 const Movimiento = sequelize.define(
   'Movimiento',
@@ -54,6 +55,22 @@ const Movimiento = sequelize.define(
       },
       notEmpty: {
         msg: "El saldo disponible no puede ser vacio",
+      },
+    },
+   },
+   "id_tarjeta_credito": {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: TarjetaCredito,
+      key: 'id'
+    },
+    validate: {
+      notNull: {
+        msg: "El id la tarjeta de credito no puede ser nulo",
+      },
+      notEmpty: {
+        msg: "El id de la tarjeta de credito no puede ser vacio",
       },
     },
    },
