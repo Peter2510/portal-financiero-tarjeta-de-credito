@@ -8,10 +8,12 @@ const EntidadProveedor = require('../models/entidad_proveedor.models');
 
 const crearTarjetaCredito = async (req, res) => {
     try {
-        const { id_tipo_tarjeta, fecha_creacion, notificar_uso, limite_credito, nombre_tarjeta, numero_tarjeta, cvv, eliminada, cantidad_rechazos, bloqueado, id_usuario, saldo, id_entidad_proveedor } = req.body;
+        const { id_tipo_tarjeta, notificar_uso, limite_credito, id_usuario, id_entidad_proveedor } = req.body;
         
         //serch user by id
         const usuario = await Usuario.findByPk(id_usuario);
+
+        console.log(usuario);
 
         if (!usuario) {
             return res.status(404).json({ ok: false, mensaje: 'No se encontró el usuario' });
@@ -29,29 +31,32 @@ const crearTarjetaCredito = async (req, res) => {
             return res.status(404).json({ ok: false, mensaje: 'No se encontró la entidad proveedora' });
         }
 
-        nombre_tarjeta = `${usuario.nombre_usuario} ${tipoTarjeta.tipo} ${entidadProveedor.entidad}`;
+        nombre_tarjeta = `${usuario.nombre_usuario}.${tipoTarjeta.tipo}@${entidadProveedor.entidad}`;
         
         const tarjetaCredito = await TarjetaCredito.create({
             id: uuidv4(),
             id_tipo_tarjeta,
-            fecha_creacion: Date,
+            fecha_creacion: new Date(),
             notificar_uso,
             limite_credito,
             nombre_tarjeta,
+            saldo: limite_credito,
             numero_tarjeta: generarNumeroTarjeta(),
             cvv: generarCVV(),
             eliminada: false,
             cantidad_rechazos: 0,
             bloqueado: 0,
             id_usuario,
-            saldo,
             id_entidad_proveedor 
         });
+
+
         return res.status(201).json({
             ok: true,
             mensaje: 'Tarjeta de crédito creada correctamente'
         });
     } catch (error) {
+        console.log(error); 
         return res.status(500).json({ ok: false, mensaje: error.message });
     }
 
@@ -68,6 +73,9 @@ const crearTarjetaCredito = async (req, res) => {
 
 }
 
+module.exports = {
+    crearTarjetaCredito
+}
 
 
 

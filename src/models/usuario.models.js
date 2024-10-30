@@ -50,13 +50,13 @@ const Usuario = sequelize.define(
             validate: {
                 len: {
                     args: [3, 50],
-                    msg: "El nombre de usuario debe tener entre 3 y 50 caracteres",
+                    msg: "El correo electrónico debe tener entre 3 y 50 caracteres",
                 },
                 notNull: {
-                    msg: "El nombre de usuario es requerido",
+                    msg: "El correo electrónico es requerido",
                 },
                 notEmpty: {
-                    msg: "El nombre de usuario no puede estar vacio",
+                    msg: "El correo electrónico no puede estar vacío",
                 },
             },
         },
@@ -105,7 +105,7 @@ const Usuario = sequelize.define(
                 },
             },
         },
-        "id_rol":{
+        "id_rol": {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
@@ -121,7 +121,7 @@ const Usuario = sequelize.define(
                 },
             },
         },
-        "a2f_activo":{
+        "a2f_activo": {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
@@ -147,6 +147,10 @@ const Usuario = sequelize.define(
         tableName: "usuario",
         timestamps: true,
     }
+
+
+
+
 );
 
 module.exports = Usuario;
