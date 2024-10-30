@@ -26,6 +26,23 @@ const Usuario = sequelize.define(
                 },
             },
         },
+        "nombre_usuario": {
+            type: DataTypes.STRING(50),
+            allowNull: false,
+            unique: true,
+            validate: {
+                len: {
+                    args: [3, 50],
+                    msg: "El nombre de usuario debe tener entre 3 y 50 caracteres",
+                },
+                notNull: {
+                    msg: "El nombre de usuario es requerido",
+                },
+                notEmpty: {
+                    msg: "El nombre de usuario no puede estar vacio",
+                },
+            },
+        },
         "correo_electronico": {
             type: DataTypes.STRING(50),
             allowNull: false,

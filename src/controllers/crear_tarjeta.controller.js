@@ -13,27 +13,40 @@ const crearTarjetaCredito = async (req, res) => {
         //serch user by id
         const usuario = await Usuario.findByPk(id_usuario);
 
-        const tipoCuenta = await TipoTarjeta.findByPk(id_tipo_cuenta);
-
-        if (!tipoCuenta) {
-            return res.status(404).json({ ok: false, mensaje: 'No se encontró el tipo de cuenta' });
-        }
-
-        const entidadProveedor = await EntidadProveedor.findByPk(id_entidad_proveedor);
-
-
-
         if (!usuario) {
             return res.status(404).json({ ok: false, mensaje: 'No se encontró el usuario' });
         }
 
+        const tipoTarjeta = await TipoTarjeta.findByPk(id_tipo_tarjeta);
 
+        if (!tipoTarjeta) {
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró el tipo de tarjeta' });
+        }
 
+        const entidadProveedor = await EntidadProveedor.findByPk(id_entidad_proveedor);
 
+        if (!entidadProveedor) {
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la entidad proveedora' });
+        }
 
+        nombre_tarjeta = `${usuario.nombre_usuario} ${tipoTarjeta.tipo} ${entidadProveedor.entidad}`;
         
-        const id = uuidv4();
-        const tarjetaCredito = await TarjetaCredito.create({ id, id_tipo_tarjeta, fecha_creacion, notificar_uso, limite_credito, nombre_tarjeta, numero_tarjeta, cvv, eliminada, cantidad_rechazos, bloqueado, id_usuario, saldo, id_entidad_proveedor });
+        const tarjetaCredito = await TarjetaCredito.create({
+            id: uuidv4(),
+            id_tipo_tarjeta,
+            fecha_creacion: Date,
+            notificar_uso,
+            limite_credito,
+            nombre_tarjeta,
+            numero_tarjeta: generarNumeroTarjeta(),
+            cvv: generarCVV(),
+            eliminada: false,
+            cantidad_rechazos: 0,
+            bloqueado: 0,
+            id_usuario,
+            saldo,
+            id_entidad_proveedor 
+        });
         return res.status(201).json({
             ok: true,
             mensaje: 'Tarjeta de crédito creada correctamente'
@@ -41,6 +54,18 @@ const crearTarjetaCredito = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ ok: false, mensaje: error.message });
     }
+
+
+    function generarNumeroTarjeta() {
+        const numeroTarjeta = Math.floor(100000 + Math.random() * 900000);
+        return numeroTarjeta;
+    }
+
+    function generarCVV() {
+        const numeroTresDigitos = Math.floor(100 + Math.random() * 900);
+        return numeroTresDigitos;
+    }
+
 }
 
 
