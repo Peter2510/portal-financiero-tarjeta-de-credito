@@ -8,6 +8,7 @@ const TipoTarjeta = require('../models/tipo_tarjeta.models');
 const EntidadProveedor = require('../models/entidad_proveedor.models');
 const Movimiento = require('../models/movimiento.models');
 const Configuracion = require('../models/configuracion.models');
+const BloqueoTarjeta = require('../models/bloqueo_tarjeta.models');
 
 const crearTarjetaCredito = async (req, res) => {
     try {
@@ -121,6 +122,13 @@ const generarDebito = async (req, res) => {
 
             if (cantidad_rechazos >= 3) {
                 await tarjetaCredito.update({ cantidad_rechazos, bloqueado: true }, { transaction });
+                await BloqueoTarjeta.create({
+                    id: uuidv4(),
+                    id_tarjeta: tarjetaCredito.id,
+                    fecha_bloqueo: new Date(),
+                    comentario: 'La tarjeta ha sido rechazada 3 veces por superar el límite de crédito',
+                    id_motivo: '1a0f5523-ad70-4809-a94e-733e5614aa8b'
+                }, { transaction });
                 await transaction.commit();
                 return res.status(423).json({ ok: false, mensaje: 'La tarjeta ha sido rechazada 3 veces por superar el límite de crédito y ha sido bloqueada' });
             }
@@ -232,6 +240,8 @@ const generarCredito = async (req, res) => {
         return res.status(500).json({ ok: false, mensaje: error.message });
     }
 };
+
+
 
 
 

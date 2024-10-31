@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../configs/database.configs');
 const Tarjeta = require('./tarjeta_credito.models');
+const MotivoBloqueo = require('./motivo_bloqueo.models');
 
 const BloqueoTarjeta = sequelize.define(
     'BloqueoTarjeta',
@@ -51,9 +52,25 @@ const BloqueoTarjeta = sequelize.define(
             type: DataTypes.DATE,
             allowNull: true,
         },
+        "id_motivo": {
+            type: DataTypes.UUID,
+            allowNull: false,
+            references: {
+                model: MotivoBloqueo,
+                key: 'id',
+            },
+            validate: {
+                notNull: {
+                    msg: 'El campo id_motivo no puede ser nulo'
+                },
+                notEmpty: {
+                    msg: 'El campo id_motivo no puede estar vacío'
+                },
+            },
+        },
     },
     {
-        tableName: 'eliminacion_tarjeta',
+        tableName: 'bloqueo_tarjeta',
         timestamps: true,
     }
 );
