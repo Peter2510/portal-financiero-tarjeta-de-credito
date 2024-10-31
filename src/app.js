@@ -20,6 +20,7 @@ const tipoTarjetaRoutes = require('./routes/tipo_tarjeta.routes');
 const movimientoRoutes = require('./routes/movimientos.routes');
 const tarjetaCreditoRoutes = require('./routes/tarjeta_credito.routes');
 const comentarioRoutes = require('./routes/comentarios.routes');
+const reportesRoutes = require('./routes/reportes.routes');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -43,7 +44,8 @@ app.use(tipoTarjetaRoutes);
 app.use(movimientoRoutes);
 app.use(tarjetaCreditoRoutes);
 app.use(comentarioRoutes);
-    
+app.use(reportesRoutes);    
+
 app.get('/',(req,res)=>{
     res.send('Hello from Backend API')
 });

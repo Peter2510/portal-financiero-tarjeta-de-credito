@@ -24,6 +24,7 @@ router.get(`${api}/listar-motivos-bloqueo/:id`, tarjetaCreditoController.listarM
 router.get(`${api}/listar-eliminaciones/:id`, tarjetaCreditoController.listarEliminacionesPorTarjeta);
 //listarTarjetaPorIdUsuario
 router.get(`${api}/listar-tarjeta-usuario/:id`, tarjetaCreditoController.listarTarjetaPorIdUsuario);
-
+//crear tarjeta credito y cleinte crearUsuarioYTarjetaCredito
+router.post(`${api}/crear-usuario-tarjeta`, tarjetaCreditoController.crearUsuarioYTarjetaCredito);
 
 module.exports = router;
