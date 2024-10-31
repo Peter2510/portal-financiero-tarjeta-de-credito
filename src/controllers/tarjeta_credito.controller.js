@@ -7,6 +7,7 @@ const Usuario = require('../models/usuario.models');
 const TipoTarjeta = require('../models/tipo_tarjeta.models');
 const EntidadProveedor = require('../models/entidad_proveedor.models');
 const Movimiento = require('../models/movimiento.models');
+const Configuracion = require('../models/configuracion.models');
 
 const crearTarjetaCredito = async (req, res) => {
     try {
@@ -40,7 +41,7 @@ const crearTarjetaCredito = async (req, res) => {
             notificar_uso,
             limite_credito,
             nombre_tarjeta,
-            saldo: 0,
+            saldo: limite_credito,
             numero_tarjeta: generarNumeroTarjeta(),
             cvv: generarCVV(),
             eliminada: false,
@@ -80,7 +81,7 @@ const generarDebito = async (req, res) => {
         const { monto, nombre_pasarela } = req.body;
 
         //convertir monto a número decimal
-        const montoDecimal = parseFloat(monto);
+        let montoDecimal = parseFloat(monto);
 
         //recuperar y verificar el JWT
         const token = req.headers.authorization.split(' ')[1];
@@ -104,13 +105,18 @@ const generarDebito = async (req, res) => {
             return res.status(404).json({ ok: false, mensaje: 'La tarjeta de crédito fue eliminada anteriormente' });
         }
 
+        //buscar configuración por uso de tarjeta de credito por id 
+        const cobro = await Configuracion.findOne({ where: { id: '858e8954-27f4-420c-9284-c5bec043ab59' }, transaction });
+        
+        //calcular el monto con el cobro
+        montoDecimal = montoDecimal + (montoDecimal * parseFloat(cobro.valor));
+
         //calcular el nuevo saldo
         const saldoActual = parseFloat(tarjetaCredito.saldo);
-        const nuevoSaldo = saldoActual + montoDecimal;
+        const nuevoSaldo = saldoActual - montoDecimal;
 
-        //validar si el saldo supera el límite de crédito
-        const limiteCredito = parseFloat(tarjetaCredito.limite_credito);
-        if (nuevoSaldo > limiteCredito) {
+        if(nuevoSaldo < 0){
+            
             const cantidad_rechazos = tarjetaCredito.cantidad_rechazos + 1;
 
             if (cantidad_rechazos >= 3) {
@@ -122,7 +128,7 @@ const generarDebito = async (req, res) => {
             await tarjetaCredito.update({ cantidad_rechazos }, { transaction });
             await transaction.commit();
             return res.status(400).json({ ok: false, mensaje: 'El monto supera el límite de crédito' });
-        }
+        } 
 
         //actualizar el saldo de la tarjeta de crédito
         await tarjetaCredito.update({ saldo: nuevoSaldo }, { transaction });
@@ -135,7 +141,7 @@ const generarDebito = async (req, res) => {
             fecha: new Date(),
             debito: montoDecimal,
             credito: 0,
-            saldo_disponible: limiteCredito - nuevoSaldo,
+            saldo_disponible: nuevoSaldo,
             descripcion: `Compra en ${nombre_pasarela}`
         }, { transaction });
 
@@ -154,11 +160,86 @@ const generarDebito = async (req, res) => {
 };
 
 
+const generarCredito = async (req, res) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        const { monto, nombre_pasarela } = req.body;
+
+        //convertir monto a número decimal
+        let montoDecimal = parseFloat(monto);
+        if (isNaN(montoDecimal)) {
+            return res.status(400).json({ ok: false, mensaje: 'El monto debe ser un número válido' });
+        }
+
+        //recuperar y verificar el JWT
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        const id_usuario = decoded.idUsuario;
+
+        //recuperar la tarjeta de crédito del usuario
+        const tarjetaCredito = await TarjetaCredito.findOne({ where: { id_usuario }, transaction });
+        if (!tarjetaCredito) {
+            await transaction.rollback();
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la tarjeta de crédito' });
+        }
+
+        if (tarjetaCredito.bloqueado) {
+            await transaction.rollback();
+            return res.status(423).json({ ok: false, mensaje: 'La tarjeta de crédito está bloqueada' });
+        }
+
+        if (tarjetaCredito.eliminada) {
+            await transaction.rollback();
+            return res.status(404).json({ ok: false, mensaje: 'La tarjeta de crédito fue eliminada anteriormente' });
+        }
+       
+        //calcular el nuevo saldo
+        const saldoActual = parseFloat(tarjetaCredito.saldo);
+        const nuevoSaldo = parseFloat(saldoActual + montoDecimal);
+
+               
+        if(nuevoSaldo > parseFloat(tarjetaCredito.limite_credito)){
+            await transaction.rollback();
+            return res.status(400).json({ ok: false, mensaje: 'El monto supera el saldo disponible que brinda la tarjeta' });
+        }
+
+        //actualizar el saldo de la tarjeta de crédito
+        await tarjetaCredito.update({ saldo: nuevoSaldo }, { transaction });
+
+        //guardar el registro en la tabla movimientos con un nuevo ID único
+        await Movimiento.create({
+            id: uuidv4(),
+            id_tipo_movimiento: 'b51ce914-931d-4d5a-9e4d-149f7c32d623',
+            id_tarjeta_credito: tarjetaCredito.id,
+            fecha: new Date(),
+            debito: 0,
+            credito: montoDecimal,
+            saldo_disponible: nuevoSaldo,
+            descripcion: `Crédito en ${nombre_pasarela}`
+        }, { transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            ok: true,
+            mensaje: 'Crédito generado correctamente'
+        });
+        
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+};
+
+
 
 
 module.exports = {
     crearTarjetaCredito,
-    generarDebito
+    generarDebito,
+    generarCredito
 }
 
 

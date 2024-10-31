@@ -9,5 +9,6 @@ const api = '/tarjeta-credito/v1/tarjeta';
 
 router.post(`${api}/crear-tarjeta`, tarjetaCreditoController.crearTarjetaCredito);
 router.post(`${api}/generar-debito`, validacionJWTCliente, tarjetaCreditoController.generarDebito);
+router.post(`${api}/generar-credito`, validacionJWTCliente, tarjetaCreditoController.generarCredito);
 
 module.exports = router;
