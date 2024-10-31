@@ -9,6 +9,7 @@ const EntidadProveedor = require('../models/entidad_proveedor.models');
 const Movimiento = require('../models/movimiento.models');
 const Configuracion = require('../models/configuracion.models');
 const BloqueoTarjeta = require('../models/bloqueo_tarjeta.models');
+const EliminacionTarjeta = require('../models/eliminacion_tarjeta.models');
 
 const crearTarjetaCredito = async (req, res) => {
     try {
@@ -241,7 +242,140 @@ const generarCredito = async (req, res) => {
     }
 };
 
+const bloquearTarjeta = async (req, res) => {
+    const transaction = await sequelize.transaction();
 
+    try {
+        const { id_tarjeta, id_motivo, comentario } = req.body;
+
+        //recuperar la tarjeta de crédito
+        const tarjetaCredito = await TarjetaCredito.findByPk(id_tarjeta, { transaction });
+        if (!tarjetaCredito) {
+            await transaction.rollback();
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la tarjeta de crédito' });
+        }
+
+        //verificar si la tarjeta de crédito ya está bloqueada
+        if (tarjetaCredito.bloqueado) {
+            await transaction.rollback();
+            return res.status(400).json({ ok: false, mensaje: 'La tarjeta de crédito ya está bloqueada' });
+        }
+
+        //actualizar el estado de la tarjeta de crédito
+        await tarjetaCredito.update({ bloqueado: true }, { transaction });
+
+        //guardar el registro en la tabla bloqueo tarjeta
+        await BloqueoTarjeta.create({
+            id: uuidv4(),
+            id_tarjeta: id_tarjeta,
+            fecha_bloqueo: new Date(),
+            comentario: comentario,
+            id_motivo
+        }, { transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            ok: true,
+            mensaje: 'Tarjeta de crédito bloqueada correctamente'
+        });
+        
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+};
+
+const desbloquearTarjeta = async (req, res) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        const { id_tarjeta, id_motivo, comentario } = req.body;
+
+        //recuperar la tarjeta de crédito
+        const tarjetaCredito = await TarjetaCredito.findByPk(id_tarjeta, { transaction });
+        if (!tarjetaCredito) {
+            await transaction.rollback();
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la tarjeta de crédito' });
+        }
+
+        //verificar si la tarjeta de crédito ya está desbloqueada
+        if (!tarjetaCredito.bloqueado) {
+            await transaction.rollback();
+            return res.status(400).json({ ok: false, mensaje: 'La tarjeta de crédito ya está desbloqueada' });
+        }
+
+        //actualizar el estado de la tarjeta de crédito
+        await tarjetaCredito.update({ bloqueado: false }, { transaction });
+
+        //guardar el registro en la tabla bloqueo tarjeta
+        await BloqueoTarjeta.create({
+            id: uuidv4(),
+            id_tarjeta: id_tarjeta,
+            fecha_bloqueo: new Date(),
+            comentario: comentario,
+            id_motivo
+        }, { transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            ok: true,
+            mensaje: 'Tarjeta de crédito desbloqueada correctamente'
+        });
+        
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+}
+
+const eliminarTarjeta = async (req, res) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        const { id_tarjeta, id_motivo_eliminacion, comentario } = req.body;
+
+        //recuperar la tarjeta de crédito
+        const tarjetaCredito = await TarjetaCredito.findByPk(id_tarjeta, { transaction });
+        if (!tarjetaCredito) {
+            await transaction.rollback();
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la tarjeta de crédito' });
+        }
+
+        //verificar si la tarjeta de crédito ya está eliminada
+        if (tarjetaCredito.eliminada) {
+            await transaction.rollback();
+            return res.status(400).json({ ok: false, mensaje: 'La tarjeta de crédito ya está eliminada' });
+        }
+
+
+        await EliminacionTarjeta.create({
+            id: uuidv4(),
+            id_tarjeta: id_tarjeta,
+            id_motivo_eliminacion: id_motivo_eliminacion,
+            comentario
+        }, { transaction });
+
+
+        //actualizar el estado de la tarjeta de crédito
+        await tarjetaCredito.update({ eliminada: true }, { transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            ok: true,
+            mensaje: 'Tarjeta de crédito eliminada correctamente'
+        });
+        
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+}
 
 
 
@@ -249,7 +383,10 @@ const generarCredito = async (req, res) => {
 module.exports = {
     crearTarjetaCredito,
     generarDebito,
-    generarCredito
+    generarCredito,
+    bloquearTarjeta,
+    desbloquearTarjeta,
+    eliminarTarjeta
 }
 
 

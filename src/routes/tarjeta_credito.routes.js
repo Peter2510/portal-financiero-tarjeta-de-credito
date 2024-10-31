@@ -10,5 +10,9 @@ const api = '/tarjeta-credito/v1/tarjeta';
 router.post(`${api}/crear-tarjeta`, tarjetaCreditoController.crearTarjetaCredito);
 router.post(`${api}/generar-debito`, validacionJWTCliente, tarjetaCreditoController.generarDebito);
 router.post(`${api}/generar-credito`, validacionJWTCliente, tarjetaCreditoController.generarCredito);
+// bloquearTarjeta, desbloquearTarjeta, eliminarTarjeta
+router.post(`${api}/bloquear-tarjeta`, tarjetaCreditoController.bloquearTarjeta);
+router.post(`${api}/desbloquear-tarjeta`, tarjetaCreditoController.desbloquearTarjeta);
+router.post(`${api}/eliminar-tarjeta`, tarjetaCreditoController.eliminarTarjeta);
 
 module.exports = router;
