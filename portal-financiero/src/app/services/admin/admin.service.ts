@@ -88,4 +88,20 @@ export class AdminService {
 
   }
 
+  crearUsuarioYTarjeta(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/tarjeta/crear-usuario-tarjeta`, data);
+  }
+
+  //listar entidad proveedor
+  listarEntidadProveedor():Observable<any> {
+    return this.http.get(`${this.baseUrl}/entidad-proveedor/listar-entidades-proveedor`);
+  }
+
+  //listar tipo tarjeta
+  listarTipoTarjeta():Observable<any> {
+    return this.http.get(`${this.baseUrl}/tipo-tarjeta/listar-tipos-tarjeta`);
+  }
+
+
+
 }

@@ -18,6 +18,7 @@ import { BloquearTarjetaComponent } from './admin/bloquear-tarjeta/bloquear-tarj
 import { EliminarTarjetaComponent } from './admin/eliminar-tarjeta/eliminar-tarjeta.component';
 import { ConfiguracionComponent } from './admin/configuracion/configuracion.component';
 import { VerUsuariosComponent } from './admin/ver-usuarios/ver-usuarios.component';
+import { NgChartsModule } from 'ng2-charts';
 
 
 
@@ -43,7 +44,7 @@ import { VerUsuariosComponent } from './admin/ver-usuarios/ver-usuarios.componen
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-
+    NgChartsModule
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]
