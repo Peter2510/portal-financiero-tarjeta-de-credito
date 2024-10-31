@@ -116,16 +116,19 @@ const generarDebito = async (req, res) => {
         //calcular el monto con el cobro
         montoDecimal = montoDecimal + (montoDecimal * parseFloat(cobro.valor));
 
+        //calcular el nuevo saldo
+        const saldoActual = parseFloat(tarjetaCredito.saldo);
+        
+
         //validr el tipo de tarjeta para aplicar el tipo de cambio
         if (tarjetaCredito.id_tipo_tarjeta === '089eec8b-afa8-44b5-b518-6bbc7d60aa3c') {
             const tipoCambio = await Configuracion.findOne({ where: { id: '2dc1d051-7055-409e-b86c-09b969f99936' }, transaction });
             montoDecimal = montoDecimal * parseFloat(tipoCambio.valor);
         }
 
-        //calcular el nuevo saldo
-        const saldoActual = parseFloat(tarjetaCredito.saldo);
-        const nuevoSaldo = saldoActual - montoDecimal;
+        let nuevoSaldo = saldoActual - montoDecimal;
 
+        
         if (nuevoSaldo < 0) {
 
             const cantidad_rechazos = tarjetaCredito.cantidad_rechazos + 1;
@@ -214,13 +217,15 @@ const generarCredito = async (req, res) => {
 
         //calcular el nuevo saldo
         const saldoActual = parseFloat(tarjetaCredito.saldo);
-        const nuevoSaldo = parseFloat(saldoActual + montoDecimal);
+        
 
         //validr el tipo de tarjeta para aplicar el tipo de cambio
         if (tarjetaCredito.id_tipo_tarjeta === '089eec8b-afa8-44b5-b518-6bbc7d60aa3c') {
             const tipoCambio = await Configuracion.findOne({ where: { id: '2dc1d051-7055-409e-b86c-09b969f99936' }, transaction });
             montoDecimal = montoDecimal * parseFloat(tipoCambio.valor);
         }
+
+        let nuevoSaldo = parseFloat(saldoActual + montoDecimal);
 
         if (nuevoSaldo > parseFloat(tarjetaCredito.limite_credito)) {
             await transaction.rollback();
