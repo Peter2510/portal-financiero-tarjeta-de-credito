@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require("bcrypt");
 
 const crearUsuario = async (req, res) => {
-    const { nombre, correo_electronico: correo_electronico, direccion, documento_identificacion, telefono, id_rol, a2f_activo, pin } = req.body;
+    const { nombre, correo_electronico, direccion, documento_identificacion, telefono, id_rol, a2f_activo, pin, nombre_usuario } = req.body;
     // crear el pin con bcrypt
     const hashedPin = await bcrypt.hash(pin, 10);
 
@@ -17,6 +17,7 @@ const crearUsuario = async (req, res) => {
             correo_electronico: correo_electronico,
             direccion,
             documento_identificacion,
+            nombre_usuario,
             telefono,
             id_rol,
             a2f_activo,

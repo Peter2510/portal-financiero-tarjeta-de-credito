@@ -16,7 +16,7 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ ok: false, mensaje: "Credenciales incorrectas" });
+      return res.status(401).json({ ok: false, mensaje: "El usuario no esta registrado" });
     }
 
     const pinValido = await bcrypt.compare(pin, user.pin);
@@ -27,9 +27,9 @@ const login = async (req, res) => {
 
 
     //validar el a2f si esta activado
-    if (user.a2f_activo) {
-      return await utilidades.iniciar(req, res);
-    }
+    // if (user.a2f_activo) {
+    //   return await utilidades.iniciar(req, res);
+    // }
 
     const token = jwt.sign(
       {
@@ -43,10 +43,10 @@ const login = async (req, res) => {
     res.status(200)
       .cookie('token', token, {
         httpOnly: true,
-        maxAge: 3000 * 60 * 60 //3 hora de duración
+        maxAge: 9000 * 60 * 60 //9 hora de duración
       }).json({
         ok: true,
-        a2f: false,
+        //a2f: false,
         mensaje: "Inicio de sesión correcto",
         token
       })
@@ -56,6 +56,25 @@ const login = async (req, res) => {
     console.log(error);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
+};
+
+//validar si existe el correo electronico
+const validarCorreo = async (req, res) => {
+
+ const { correo_electronico } = req.params;
+
+  const usuario = await Usuario.findOne({ where: { correo_electronico } });
+
+  const status = usuario ? 200 : 404;
+  const mensaje = usuario ? "El correo está registrado" : "El correo no está registrado";
+  
+  return res.status(status).json({
+    ok: usuario ? true : false,
+    mensaje: mensaje
+  });
+  
+
+
 };
 
 const generarTokenWebService = async (req, res) => {
@@ -80,7 +99,7 @@ const generarTokenWebService = async (req, res) => {
         return res.status(200)
           .cookie('token', token, {
             httpOnly: true,
-            maxAge: 3000 * 60 * 60 //3 hora de duración
+            maxAge: 9000 * 60 * 60 //3 hora de duración
           }).json({
             ok: true,
             token
@@ -102,5 +121,6 @@ const generarTokenWebService = async (req, res) => {
 
 module.exports = {
   login,
-  generarTokenWebService
+  generarTokenWebService,
+  validarCorreo
 };
