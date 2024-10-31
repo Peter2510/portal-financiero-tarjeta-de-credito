@@ -68,4 +68,24 @@ export class AdminService {
     return this.http.get(`${this.baseUrl}/tarjeta/listar-eliminaciones/${id_tarjeta}`);
   }
 
+  //listar clients
+  listarClientes():Observable<any> {
+    return this.http.get(`${this.baseUrl}/usuario/obtener-usuarios`);
+  }
+
+  listarConfiguraciones(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/configuracion/listar-configuraciones`);
+
+  }
+
+  buscarConfiguracionPorId(id: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/configuracion/buscar-configuracion/${id}`);
+
+  }
+
+  actualizarConfiguracion(id: string, configuracion: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/configuracion/actualizar-configuracion/${id}`, configuracion);
+
+  }
+
 }

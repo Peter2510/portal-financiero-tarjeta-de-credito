@@ -20,6 +20,7 @@ import { ConfiguracionComponent } from './admin/configuracion/configuracion.comp
 import { VerUsuariosComponent } from './admin/ver-usuarios/ver-usuarios.component';
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -41,7 +42,8 @@ import { VerUsuariosComponent } from './admin/ver-usuarios/ver-usuarios.componen
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]
