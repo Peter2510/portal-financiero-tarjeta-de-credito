@@ -34,6 +34,30 @@ interface Movimiento {
   saldo_disponible: string;
 }
 
+interface Bloqueo {
+  id: string;
+  id_tarjeta: string;
+  comentario: string;
+  fecha_bloqueo: string;
+  fecha_desbloqueo: string | null;
+  motivoBloqueo: {
+    id: string;
+    motivo: string;
+  };
+}
+
+interface Eliminacion {
+  id: string;
+  id_tarjeta: string;
+  comentario: string;
+  createdAt: string;
+  id_motivo: string;
+  motivoEliminacion: {
+    id: string;
+    motivo: string;
+  };
+}
+
 @Component({
   selector: 'app-info-tarjeta',
   templateUrl: './info-tarjeta.component.html',
@@ -41,6 +65,8 @@ interface Movimiento {
 })
 export class InfoTarjetaComponent implements OnInit {
   tarjeta: Tarjeta | null = null;
+  bloqueos: Bloqueo[] = [];
+  eliminaciones: Eliminacion[] = []; 
   movimientos: Movimiento[] = [];
 
   constructor(private adminService: AdminService, private route: ActivatedRoute) { }
@@ -48,6 +74,8 @@ export class InfoTarjetaComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerTarjeta();
     this.listarMovimientos();
+    this.listarBloqueos();
+    this.listarEliminaciones();
   }
 
   obtenerTarjeta() {
@@ -116,4 +144,34 @@ export class InfoTarjetaComponent implements OnInit {
     // Guardar el archivo PDF
     doc.save('movimientos_tarjeta.pdf');
   }
+
+  listarBloqueos() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.adminService.listarMotivosBloqueoPorTarjeta(id).subscribe({
+        next: (data) => {
+          this.bloqueos = data.bloqueos;
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
+    }
+  }
+
+  listarEliminaciones() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.adminService.listarMotivosEliminacionPorTarjeta(id).subscribe({
+        next: (data) => {
+          this.eliminaciones = data.eliminaciones;
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
+    }
+  }
+
+
 }

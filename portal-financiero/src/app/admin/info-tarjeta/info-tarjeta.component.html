@@ -38,3 +38,43 @@
     </tbody>
   </table>
 </div>
+
+<div *ngIf="bloqueos.length > 0" class="p-4">
+  <h3 class="text-xl font-bold mb-4">Bloqueos Asociados</h3>
+  <table class="min-w-full bg-white border border-gray-300">
+    <thead>
+      <tr class="bg-gray-200 text-gray-700">
+        <th class="py-2 px-4 border-b">Fecha de Bloqueo</th>
+        <th class="py-2 px-4 border-b">Comentario</th>
+        <th class="py-2 px-4 border-b">Motivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bloqueo of bloqueos" class="hover:bg-gray-100">
+        <td class="py-2 px-4 border-b">{{ bloqueo.fecha_bloqueo | date: 'short' }}</td>
+        <td class="py-2 px-4 border-b">{{ bloqueo.comentario }}</td>
+        <td class="py-2 px-4 border-b">{{ bloqueo.motivoBloqueo?.motivo }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="eliminaciones.length > 0" class="p-4">
+  <h3 class="text-xl font-bold mb-4">Eliminaciones Asociadas</h3>
+  <table class="min-w-full bg-white border border-gray-300">
+    <thead>
+      <tr class="bg-gray-200 text-gray-700">
+        <th class="py-2 px-4 border-b">Fecha de Eliminación</th>
+        <th class="py-2 px-4 border-b">Comentario</th>
+        <th class="py-2 px-4 border-b">Motivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let eliminacion of eliminaciones" class="hover:bg-gray-100">
+        <td class="py-2 px-4 border-b">{{ eliminacion.createdAt | date: 'short' }}</td>
+        <td class="py-2 px-4 border-b">{{ eliminacion.comentario }}</td>
+        <td class="py-2 px-4 border-b">{{ eliminacion.motivoEliminacion?.motivo }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

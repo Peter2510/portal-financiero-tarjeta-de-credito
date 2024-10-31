@@ -57,4 +57,15 @@ export class AdminService {
   desbloquearTarjeta(id_tarjeta:any):Observable<any> {
     return this.http.post(`${this.baseUrl}/tarjeta/desbloquear-tarjeta`, {id_tarjeta});
   }
+
+  //listarMotivosBloqueoPorTarjeta
+  listarMotivosBloqueoPorTarjeta(id_tarjeta:any):Observable<any> {
+    return this.http.get(`${this.baseUrl}/tarjeta/listar-motivos-bloqueo/${id_tarjeta}`);
+  }
+
+  //listarMotivosEliminacionPorTarjeta
+  listarMotivosEliminacionPorTarjeta(id_tarjeta:any):Observable<any> {
+    return this.http.get(`${this.baseUrl}/tarjeta/listar-eliminaciones/${id_tarjeta}`);
+  }
+
 }
