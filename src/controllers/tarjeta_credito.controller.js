@@ -72,7 +72,7 @@ const crearTarjetaCredito = async (req, res) => {
 }
 
 //generar debito a la tarjeta de credito
-const generarDredito = async (req, res) => {
+const generarDebito = async (req, res) => {
     try {
        
         const { monto, nombre_tienda } = req.body;
@@ -124,15 +124,15 @@ const generarDredito = async (req, res) => {
             id_tipo_movimiento: '02fc0bda-1756-43e2-959f-5156805f1281',
             id_tarjeta_credito,
             fecha_creacion: new Date(),
-            monto,
-            tipo_movimiento: '',
-            descripcion: `Compra en ${nombre_tienda}`,
-            id_usuario
+            debito: monto,
+            credito: 0,
+            saldo_disoponible: tarjetaCredito.limite_credito - monto,
+            descripcion: `Compra en ${nombre_tienda}`
         });
 
         return res.status(200).json({
             ok: true,
-            mensaje: 'Crédito generado correctamente'
+            mensaje: 'Debito generado correctamente'
         });
 
 
@@ -143,7 +143,8 @@ const generarDredito = async (req, res) => {
 }
 
 module.exports = {
-    crearTarjetaCredito
+    crearTarjetaCredito,
+    generarDebito
 }
 
 
