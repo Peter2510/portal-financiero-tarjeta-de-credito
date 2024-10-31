@@ -9,6 +9,7 @@ router.post(`${api}/crear-usuario`, usuarioController.crearUsuario);
 router.get(`${api}/obtener-usuario/:id`, usuarioController.obtenerUsuarioPorId);
 router.put(`${api}/actualizar-usuario/:id`, usuarioController.actualizarUsuario);
 router.put(`${api}/actualizar-pin/:id`, usuarioController.actualizarPinUsuario);
+router.get(`${api}/obtener-usuarios`, usuarioController.listarClientes);
 
 
 module.exports = router;

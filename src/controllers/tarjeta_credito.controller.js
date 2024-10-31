@@ -10,11 +10,14 @@ const Movimiento = require('../models/movimiento.models');
 const Configuracion = require('../models/configuracion.models');
 const BloqueoTarjeta = require('../models/bloqueo_tarjeta.models');
 const EliminacionTarjeta = require('../models/eliminacion_tarjeta.models');
+const Moneda = require('../models/moneda.models');
+const MotivoBloqueo = require('../models/motivo_bloqueo.models');
+const MotivoEliminacion = require('../models/motivo_eliminacion.models');
 
 const crearTarjetaCredito = async (req, res) => {
     try {
         const { id_tipo_tarjeta, notificar_uso, limite_credito, id_usuario, id_entidad_proveedor } = req.body;
-        
+
         //serch user by id
         const usuario = await Usuario.findByPk(id_usuario);
 
@@ -35,7 +38,7 @@ const crearTarjetaCredito = async (req, res) => {
         }
 
         nombre_tarjeta = `${usuario.nombre_usuario}.${tipoTarjeta.tipo}@${entidadProveedor.entidad}.com`;
-        
+
         const tarjetaCredito = await TarjetaCredito.create({
             id: uuidv4(),
             id_tipo_tarjeta,
@@ -50,7 +53,7 @@ const crearTarjetaCredito = async (req, res) => {
             cantidad_rechazos: 0,
             bloqueado: 0,
             id_usuario,
-            id_entidad_proveedor 
+            id_entidad_proveedor
         });
 
 
@@ -59,7 +62,7 @@ const crearTarjetaCredito = async (req, res) => {
             mensaje: 'Tarjeta de crédito creada correctamente'
         });
     } catch (error) {
-        console.log(error); 
+        console.log(error);
         return res.status(500).json({ ok: false, mensaje: error.message });
     }
 
@@ -109,16 +112,22 @@ const generarDebito = async (req, res) => {
 
         //buscar configuración por uso de tarjeta de credito por id 
         const cobro = await Configuracion.findOne({ where: { id: '858e8954-27f4-420c-9284-c5bec043ab59' }, transaction });
-        
+
         //calcular el monto con el cobro
         montoDecimal = montoDecimal + (montoDecimal * parseFloat(cobro.valor));
+
+        //validr el tipo de tarjeta para aplicar el tipo de cambio
+        if (tarjetaCredito.id_tipo_tarjeta === '089eec8b-afa8-44b5-b518-6bbc7d60aa3c') {
+            const tipoCambio = await Configuracion.findOne({ where: { id: '2dc1d051-7055-409e-b86c-09b969f99936' }, transaction });
+            montoDecimal = montoDecimal * parseFloat(tipoCambio.valor);
+        }
 
         //calcular el nuevo saldo
         const saldoActual = parseFloat(tarjetaCredito.saldo);
         const nuevoSaldo = saldoActual - montoDecimal;
 
-        if(nuevoSaldo < 0){
-            
+        if (nuevoSaldo < 0) {
+
             const cantidad_rechazos = tarjetaCredito.cantidad_rechazos + 1;
 
             if (cantidad_rechazos >= 3) {
@@ -137,7 +146,7 @@ const generarDebito = async (req, res) => {
             await tarjetaCredito.update({ cantidad_rechazos }, { transaction });
             await transaction.commit();
             return res.status(400).json({ ok: false, mensaje: 'El monto supera el límite de crédito' });
-        } 
+        }
 
         //actualizar el saldo de la tarjeta de crédito
         await tarjetaCredito.update({ saldo: nuevoSaldo }, { transaction });
@@ -160,7 +169,7 @@ const generarDebito = async (req, res) => {
             ok: true,
             mensaje: 'Débito generado correctamente'
         });
-        
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -202,13 +211,18 @@ const generarCredito = async (req, res) => {
             await transaction.rollback();
             return res.status(404).json({ ok: false, mensaje: 'La tarjeta de crédito fue eliminada anteriormente' });
         }
-       
+
         //calcular el nuevo saldo
         const saldoActual = parseFloat(tarjetaCredito.saldo);
         const nuevoSaldo = parseFloat(saldoActual + montoDecimal);
 
-               
-        if(nuevoSaldo > parseFloat(tarjetaCredito.limite_credito)){
+        //validr el tipo de tarjeta para aplicar el tipo de cambio
+        if (tarjetaCredito.id_tipo_tarjeta === '089eec8b-afa8-44b5-b518-6bbc7d60aa3c') {
+            const tipoCambio = await Configuracion.findOne({ where: { id: '2dc1d051-7055-409e-b86c-09b969f99936' }, transaction });
+            montoDecimal = montoDecimal * parseFloat(tipoCambio.valor);
+        }
+
+        if (nuevoSaldo > parseFloat(tarjetaCredito.limite_credito)) {
             await transaction.rollback();
             return res.status(400).json({ ok: false, mensaje: 'El monto supera el saldo disponible que brinda la tarjeta' });
         }
@@ -234,7 +248,7 @@ const generarCredito = async (req, res) => {
             ok: true,
             mensaje: 'Crédito generado correctamente'
         });
-        
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -279,7 +293,7 @@ const bloquearTarjeta = async (req, res) => {
             ok: true,
             mensaje: 'Tarjeta de crédito bloqueada correctamente'
         });
-        
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -291,7 +305,7 @@ const desbloquearTarjeta = async (req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
-        const { id_tarjeta, id_motivo, comentario } = req.body;
+        const { id_tarjeta } = req.body;
 
         //recuperar la tarjeta de crédito
         const tarjetaCredito = await TarjetaCredito.findByPk(id_tarjeta, { transaction });
@@ -309,22 +323,13 @@ const desbloquearTarjeta = async (req, res) => {
         //actualizar el estado de la tarjeta de crédito
         await tarjetaCredito.update({ bloqueado: false }, { transaction });
 
-        //guardar el registro en la tabla bloqueo tarjeta
-        await BloqueoTarjeta.create({
-            id: uuidv4(),
-            id_tarjeta: id_tarjeta,
-            fecha_bloqueo: new Date(),
-            comentario: comentario,
-            id_motivo
-        }, { transaction });
-
         await transaction.commit();
 
         return res.status(200).json({
             ok: true,
             mensaje: 'Tarjeta de crédito desbloqueada correctamente'
         });
-        
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -369,7 +374,7 @@ const eliminarTarjeta = async (req, res) => {
             ok: true,
             mensaje: 'Tarjeta de crédito eliminada correctamente'
         });
-        
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -377,6 +382,151 @@ const eliminarTarjeta = async (req, res) => {
     }
 }
 
+const listarTarjetas = async (req, res) => {
+    try {
+        const tarjetas = await TarjetaCredito.findAll({
+            include: [
+                {
+                    model: TipoTarjeta,
+                    as: 'tipoTarjeta',
+                    attributes: ['id', 'tipo'],
+                    include: {
+                        model: Moneda,
+                        as: 'moneda',
+                        attributes: ['id', 'simbolo'],
+                    },
+                },
+            ],
+        });
+
+        return res.status(200).json({ ok: true, tarjetas });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+};
+
+const listarTarjetaPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const tarjeta = await TarjetaCredito.findByPk(id, {
+            include: [
+                {
+                    model: TipoTarjeta,
+                    as: 'tipoTarjeta',
+                    attributes: ['id', 'tipo'],
+                    include: {
+                        model: Moneda,
+                        as: 'moneda',
+                        attributes: ['id', 'simbolo'],
+                    },
+                },
+            ],
+        });
+
+        if (!tarjeta) {
+            return res.status(404).json({ ok: false, mensaje: 'Tarjeta no encontrada' });
+        }
+
+        return res.status(200).json({ ok: true, tarjeta });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+};
+
+//mostrar movimiento de tarjeta por id
+const listarMovimientoPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const movimientos = await Movimiento.findAll({
+            where: { id_tarjeta_credito: id },
+            order: [['fecha', 'DESC']]
+        });
+
+        if (!movimientos) {
+            return res.status(404).json({ ok: false, mensaje: 'Movimientos no encontrados' });
+        }
+
+        return res.status(200).json({ ok: true, movimientos });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+};
+
+const listarMotivosBloqueoPorTarjeta = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const bloqueos = await BloqueoTarjeta.findAll({
+            where: { id_tarjeta: id },
+            include: [
+                {
+                    model: TarjetaCredito,
+                    as: 'tarjeta',
+                    attributes: ['id', 'nombre_tarjeta', 'numero_tarjeta']
+                },
+                {
+                    model: MotivoBloqueo,
+                    as: 'motivoBloqueo',
+                    attributes: ['id', 'motivo']
+                }
+            ]
+        });
+        res.json({bloqueos: bloqueos});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+const listarEliminacionesPorTarjeta = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const eliminaciones = await EliminacionTarjeta.findAll({
+            where: { id_tarjeta: id },
+            include: [
+                {
+                    model: MotivoEliminacion,
+                    as: 'motivoEliminacion',
+                    attributes: ['id', 'motivo']
+                },
+                {
+                    model: TarjetaCredito,
+                    as: 'tarjeta',
+                    attributes: ['id', 'nombre_tarjeta', 'numero_tarjeta']
+                }
+            ]
+        });
+        res.json({eliminaciones:eliminaciones});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//obtener tarjeta por id del usuario
+const listarTarjetaPorIdUsuario = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const tarjeta = await TarjetaCredito.findOne({
+            where: { id_usuario: id }
+        });
+
+        if (!tarjeta) {
+            return res.status(404).json({ ok: false, mensaje: 'No se encontró la tarjeta' });
+        }
+
+        return res.status(200).json({ ok: true, tarjeta });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ ok: false, mensaje: error.message });
+    }
+}
 
 
 
@@ -386,7 +536,13 @@ module.exports = {
     generarCredito,
     bloquearTarjeta,
     desbloquearTarjeta,
-    eliminarTarjeta
+    eliminarTarjeta,
+    listarTarjetas,
+    listarTarjetaPorId,
+    listarMovimientoPorId,
+    listarMotivosBloqueoPorTarjeta,
+    listarEliminacionesPorTarjeta,
+    listarTarjetaPorIdUsuario
 }
 
 

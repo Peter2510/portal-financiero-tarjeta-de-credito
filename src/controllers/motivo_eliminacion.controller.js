@@ -2,6 +2,8 @@ const { sequelize } = require("../configs/database.configs");
 require('dotenv').config();
 const MotivoEliminacion = require("../models/motivo_eliminacion.models");
 const { v4: uuidv4 } = require('uuid');
+const EliminacionTarjeta = require("../models/eliminacion_tarjeta.models");
+const TarjetaCredito = require("../models/tarjeta_credito.models");
 
 
 const crearMotivoEliminacion = async (req, res) => {
@@ -40,7 +42,33 @@ const listarMotivosEliminacion = async (req, res) => {
     }
 }
 
+const listarEliminacionesPorTarjeta = async (req, res) => {
+    const { idTarjeta } = req.params;
+
+    try {
+        const eliminaciones = await EliminacionTarjeta.findAll({
+            where: { id_tarjeta: idTarjeta },
+            include: [
+                {
+                    model: MotivoEliminacion,
+                    as: 'motivoEliminacion',
+                    attributes: ['id', 'motivo']
+                },
+                {
+                    model: TarjetaCredito,
+                    as: 'tarjeta',
+                    attributes: ['id', 'nombre_tarjeta', 'numero_tarjeta']
+                }
+            ]
+        });
+        res.json(eliminaciones);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     crearMotivoEliminacion,
-    listarMotivosEliminacion
+    listarMotivosEliminacion,
+    listarEliminacionesPorTarjeta
 };

@@ -42,22 +42,6 @@ const EliminacionTarjeta = sequelize.define(
                 },
             },
         },
-        "id_tarjeta": {
-            type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: Tarjeta,
-                key: 'id',
-            },
-            validate: {
-                notNull: {
-                    msg: 'El campo id_tarjeta no puede ser nulo'
-                },
-                notEmpty: {
-                    msg: 'El campo id_tarjeta no puede estar vacío'
-                },
-            },
-        },
         comentario: {
             type: DataTypes.STRING(255),
             allowNull: true,

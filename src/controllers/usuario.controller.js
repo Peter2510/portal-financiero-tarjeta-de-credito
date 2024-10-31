@@ -129,9 +129,32 @@ const actualizarPinUsuario = async (req, res) => {
     }
 }
 
+//listar clientes
+const listarClientes = async (req, res) => {
+    try {
+        const clientes = await Usuario.findAll({
+            where: {
+                id_rol: 'ba648de8-45f0-49b3-8edf-6d156ea12ce6'
+            },
+            include: [{ model: Rol, as: 'rol' }]
+        });
+        return res.status(200).json({
+            ok: true,
+            clientes
+        });
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            mensaje: "Error al obtener los clientes"
+        });
+    }
+}
+
+
 module.exports = {
     crearUsuario,
     obtenerUsuarioPorId,
     actualizarUsuario,
-    actualizarPinUsuario
+    actualizarPinUsuario,
+    listarClientes
 }
