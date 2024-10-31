@@ -16,7 +16,7 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ ok: false, mensaje: "El usuario no esta registrado" });
+      return res.status(404).json({ ok: false, mensaje: "El usuario no esta registrado" });
     }
 
     const pinValido = await bcrypt.compare(pin, user.pin);

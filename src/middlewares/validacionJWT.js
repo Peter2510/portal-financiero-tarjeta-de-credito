@@ -15,7 +15,7 @@ const validacionJWTAdmin = (req, res, next) => {
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
         if(err) return res.status(403).json({ ok: false, mensaje: 'Token no válido' });
 
-        if (decoded.idTipoUsuario !== '362a346f-ddda-4b2c-b55d-cc624a37eb5b' && decoded.idTipoUsuario !== 3) {
+        if (decoded.idRol !== '362a346f-ddda-4b2c-b55d-cc624a37eb5b' && decoded.idTipoUsuario !== 3) {
             return res.status(403).json({ ok: false, mensaje: 'No tienes permisos de administrador para realizar esta acción' });
         }
 
@@ -36,7 +36,7 @@ const validacionJWTCliente = (req, res, next) => {
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
         if(err) return res.status(403).json({ ok: false, mensaje: 'Token no válido' });
 
-        if(decoded.idTipoUsuario !== 'ba648de8-45f0-49b3-8edf-6d156ea12ce6') return res.status(403).json({ ok: false, mensaje: 'No tienes permisos de cliente para realizar esta acción' });
+        if(decoded.idRol !== 'ba648de8-45f0-49b3-8edf-6d156ea12ce6') return res.status(403).json({ ok: false, mensaje: 'No tienes permisos de cliente para realizar esta acción' });
 
         next();
     });
