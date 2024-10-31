@@ -75,7 +75,7 @@ const crearTarjetaCredito = async (req, res) => {
 const generarDebito = async (req, res) => {
     try {
        
-        const { monto, nombre_tienda } = req.body;
+        const { monto, nombre_pasarela } = req.body;
 
         //recuperar el jwt del usuario
         const token = req.headers.authorization.split(' ')[1];
@@ -112,6 +112,12 @@ const generarDebito = async (req, res) => {
 
         //validar si el saldo es mayor al limite de credito
         if (nuevoSaldo > tarjetaCredito.limite_credito) {
+            let cantidad_rechazos = tarjetaCredito.cantidad_rechazos + 1;
+            if(cantidad_rechazos==3){
+                await TarjetaCredito.update({ cantidad_rechazos, bloqueado: 1 }, { where: { id: id_tarjeta } });
+                return res.status(400).json({ ok: false, mensaje: 'La tarjeta ha sido rechazada 3 veces a lo largo de su uso por superar el limite de crédito, por lo tanto ha sido bloqueada'});    
+            }
+            await TarjetaCredito.update({ cantidad_rechazos }, { where: { id: id_tarjeta } });
             return res.status(400).json({ ok: false, mensaje: 'El monto supera el límite de crédito' });
         }
 
@@ -127,7 +133,7 @@ const generarDebito = async (req, res) => {
             debito: monto,
             credito: 0,
             saldo_disoponible: tarjetaCredito.limite_credito - monto,
-            descripcion: `Compra en ${nombre_tienda}`
+            descripcion: `Compra en ${nombre_pasarela}`
         });
 
         return res.status(200).json({
@@ -141,6 +147,9 @@ const generarDebito = async (req, res) => {
         return res.status(500).json({ ok: false, mensaje: error.message });
     }
 }
+
+
+//generar 
 
 module.exports = {
     crearTarjetaCredito,
