@@ -1,0 +1,21 @@
+<app-header></app-header>
+<div class="p-4">
+  <h2 class="text-2xl font-bold mb-4">Bloquear Tarjeta</h2>
+  
+  <div class="mb-4">
+    <label for="motivo" class="block text-gray-700">Motivo de Bloqueo:</label>
+    <select id="motivo" [(ngModel)]="motivoSeleccionado" class="border border-gray-300 rounded p-2 w-full">
+      <option value="" disabled selected>Selecciona un motivo</option>
+      <option *ngFor="let motivo of motivos" [value]="motivo.id">{{ motivo.motivo }}</option>
+    </select>
+  </div>
+
+  <div class="mb-4">
+    <label for="comentario" class="block text-gray-700">Comentario:</label>
+    <textarea id="comentario" [(ngModel)]="comentario" rows="4" class="border border-gray-300 rounded p-2 w-full"></textarea>
+  </div>
+
+  <button (click)="bloquearTarjeta()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+    Bloquear Tarjeta
+  </button>
+</div>

@@ -1,0 +1,28 @@
+<app-header></app-header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+  <div *ngFor="let tarjeta of tarjetas" class="max-w-sm rounded overflow-hidden shadow-lg">
+    <div class="px-6 py-4">
+      <div class="font-bold text-xl mb-2">{{ tarjeta.nombre_tarjeta }}</div>
+      <p class="text-gray-700 text-base">
+        Límite de crédito: {{ tarjeta.limite_credito }}<br>
+        Saldo: {{ tarjeta.tipoTarjeta.moneda.simbolo }} {{ tarjeta.saldo }}<br>
+        Estado: {{ tarjeta.bloqueado ? 'Bloqueada' : 'Activa' }}<br>
+        Tipo de tarjeta: {{ tarjeta.tipoTarjeta.tipo }}<br>
+        Moneda: {{ tarjeta.tipoTarjeta.moneda.simbolo }}
+      </p>
+    </div>
+    <div class="px-6 pt-4 pb-2 flex justify-between">
+      <button (click)="verTarjeta(tarjeta.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Ver
+      </button>
+      <button *ngIf="!tarjeta.eliminada" (click)="eliminarTarjeta(tarjeta.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+        Eliminar
+      </button>
+      <button 
+        (click)="tarjeta.bloqueado ? desbloquearTarjeta(tarjeta.id) : bloquearTarjeta(tarjeta.id)" 
+        class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+        {{ tarjeta.bloqueado ? 'Desbloquear' : 'Bloquear' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<app-header></app-header>
+<div *ngIf="tarjeta" class="p-4">
+  <h2 class="text-2xl font-bold mb-4">{{ tarjeta.nombre_tarjeta }}</h2>
+  <p><strong>Fecha de creación:</strong> {{ tarjeta.fecha_creacion }}</p>
+  <p><strong>Límite de crédito:</strong> {{ tarjeta.limite_credito }}</p>
+  <p><strong>Saldo:</strong> {{ tarjeta.saldo }}</p>
+  <p><strong>Estado:</strong> {{ tarjeta.bloqueado ? 'Bloqueada' : 'Activa' }}</p>
+  <p><strong>Notificar uso:</strong> {{ tarjeta.notificar_uso ? 'Sí' : 'No' }}</p>
+  <p><strong>Cantidad de rechazos:</strong> {{ tarjeta.cantidad_rechazos }}</p>
+  <p><strong>Tipo de tarjeta:</strong> {{ tarjeta.tipoTarjeta.tipo }}</p>
+  <p><strong>Moneda:</strong> {{ tarjeta.tipoTarjeta.moneda.simbolo }}</p>
+</div>
+
+<button (click)="descargarPDF()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
+  Descargar Movimientos en PDF
+</button>
+
+<div *ngIf="movimientos.length > 0" class="p-4">
+  <h3 class="text-xl font-bold mb-4">Movimientos</h3>
+  <table class="min-w-full bg-white border border-gray-300">
+    <thead>
+      <tr class="bg-gray-200 text-gray-700">
+        <th class="py-2 px-4 border-b">Fecha</th>
+        <th class="py-2 px-4 border-b">Descripción</th>
+        <th class="py-2 px-4 border-b">Débito</th>
+        <th class="py-2 px-4 border-b">Crédito</th>
+        <th class="py-2 px-4 border-b">Saldo disponible</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let movimiento of movimientos" class="hover:bg-gray-100">
+        <td class="py-2 px-4 border-b">{{ movimiento.fecha }}</td>
+        <td class="py-2 px-4 border-b">{{ movimiento.descripcion }}</td>
+        <td class="py-2 px-4 border-b">Q.{{ movimiento.debito }}</td>
+        <td class="py-2 px-4 border-b">Q.{{ movimiento.credito }}</td>
+        <td class="py-2 px-4 border-b">Q.{{ movimiento.saldo_disponible }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
