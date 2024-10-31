@@ -26,6 +26,18 @@ const Movimiento = sequelize.define(
         },
       },
     },
+    fecha:{
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+          notNull: {
+              msg: 'El campo fecha no puede ser nulo'
+          },
+          notEmpty: {
+              msg: 'El campo fecha no puede estar vacío'
+          },
+      },
+    },
     descripcion: {
       type: DataTypes.STRING(150),
       allowNull: false,

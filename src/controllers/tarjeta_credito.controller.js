@@ -129,7 +129,7 @@ const generarDebito = async (req, res) => {
             id: uuidv4(),
             id_tipo_movimiento: '02fc0bda-1756-43e2-959f-5156805f1281',
             id_tarjeta_credito,
-            fecha_creacion: new Date(),
+            fecha: new Date(),
             debito: monto,
             credito: 0,
             saldo_disoponible: tarjetaCredito.limite_credito - monto,
@@ -149,7 +149,7 @@ const generarDebito = async (req, res) => {
 }
 
 
-//generar 
+//generar credito
 
 module.exports = {
     crearTarjetaCredito,
