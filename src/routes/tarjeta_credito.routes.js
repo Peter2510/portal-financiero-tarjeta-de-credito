@@ -26,5 +26,8 @@ router.get(`${api}/listar-eliminaciones/:id`, tarjetaCreditoController.listarEli
 router.get(`${api}/listar-tarjeta-usuario/:id`, tarjetaCreditoController.listarTarjetaPorIdUsuario);
 //crear tarjeta credito y cleinte crearUsuarioYTarjetaCredito
 router.post(`${api}/crear-usuario-tarjeta`, tarjetaCreditoController.crearUsuarioYTarjetaCredito);
+//obtenerIdTarjetaPorIdUsuario
+router.get(`${api}/obtener-id-tarjeta/:id`, tarjetaCreditoController.obtenerIdTarjetaPorIdUsuario);
+
 
 module.exports = router;

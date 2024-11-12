@@ -621,6 +621,26 @@ function generarCVV() {
         }
     }
 
+    //obtner id de la tarjeta en base al id del usuario
+    const obtenerIdTarjetaPorIdUsuario = async (req, res) => {
+        try {
+            const { id } = req.params;
+    
+            const tarjeta = await TarjetaCredito.findOne({
+                where: { id_usuario: id }
+            });
+    
+            if (!tarjeta) {
+                return res.status(404).json({ message: 'Tarjeta no encontrada' });
+            }
+    
+            return res.json({ id: tarjeta.id });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Error interno del servidor' });
+        }
+    };
+
 
 
     module.exports = {
@@ -636,7 +656,8 @@ function generarCVV() {
         listarMotivosBloqueoPorTarjeta,
         listarEliminacionesPorTarjeta,
         listarTarjetaPorIdUsuario,
-        crearUsuarioYTarjetaCredito
+        crearUsuarioYTarjetaCredito,
+        obtenerIdTarjetaPorIdUsuario
     }
 
 
